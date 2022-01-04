@@ -4,5 +4,22 @@
 $.ajaxPrefilter(function (options) {
   // 在发起真正的 Ajax 请求之前，统一拼接请求的根路径
   options.url = 'http://api-breakingnews-web.itheima.net' + options.url
-  console.log(options.url)
+  // console.log(options.url)
+
+  // 统一为有权限的接口，设置headers 请求头
+  // 如果 url 地址里面包含 /my/  则说明为有权限的接口，需要设置headers
+  if (options.url.indexOf('/my/') !== -1) {
+    options.headers = {
+      Authorization: localStorage.getItem('token') || '',
+    }
+  }
+  options.complete = function (res) {
+    // 在complete 函数中，可以使用res.responseJSON 获取到相应回来的数据
+    if (res.responseJSON.status === 1 && res.responseJSON.message === '身份认证失败！') {
+      // 1、清空token
+      localStorage.removeItem('token')
+      // 2、跳转到登录页面
+      location.href = '/login.html'
+    }
+  }
 })
